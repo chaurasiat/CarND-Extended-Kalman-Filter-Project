@@ -56,21 +56,23 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   float vy = x_(3);
     
   // Equations for h_func below
-  float eq1 = sqrt(px * px + py * py);
+  float rho  = sqrt(px * px + py * py);
   //check division by zero
-  if(eq1 < .00001) {
+  if(rho  < .00001) {
     px += .001;
     py += .001;
-    eq1 = sqrt(px * px + py * py);
+    rho = sqrt(px * px + py * py);
   }
-  float eq2 = atan2(py,px);
-  float eq3 = (px*vx+py*vy)/eq1;
+  float theta  = atan2(py,px);
+  float rho_dot  = (px*vx+py*vy)/rho;
     
   //Feed in equations above
   VectorXd H_func(3);
-  H_func << eq1, eq2, eq3;
+  H_func << rho, theta, rho_dot;
     
+  
   VectorXd y = z - H_func;
+  //Normalization between -pi to pi
   if(y(1)>M_PI)
 		  y(1) -= 2*M_PI;
 	else if(y(1)<=-M_PI)
